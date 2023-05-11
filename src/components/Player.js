@@ -3,7 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlay, faAngleLeft, faAngleRight, faPause } from "@fortawesome/free-solid-svg-icons";
 
 const Player = (props) => {
-    const { currentSong, isPlaying, setIsPlaying } = props;
+    const { songs, currentSong, setCurrentSong, isPlaying, setIsPlaying } = props;
     const audioRef = useRef(null);
 
     const [songTimeInfo, setSongTimeInfo] = useState({
@@ -21,12 +21,6 @@ const Player = (props) => {
         }
     }
 
-    const updateTime = (e) => {
-        const currentTime = e.target.currentTime;
-        const duration = e.target.duration;
-        setSongTimeInfo({ ...songTimeInfo, currentTime, duration });
-    }
-
     const formatTime = (time) => {
         const minutes = Math.floor(time / 60)
         const seconds = Math.floor(time % 60)
@@ -40,21 +34,62 @@ const Player = (props) => {
         setSongTimeInfo({ ...songTimeInfo, currentTime: draggedTime });
     }
 
+    const updateTimeHandler = (e) => {
+        const currentTime = e.target.currentTime;
+        const duration = e.target.duration;
+        setSongTimeInfo({ ...songTimeInfo, currentTime, duration });
+    }
+
+    const autoPlayHandler = () => {
+        if (isPlaying) {
+            audioRef.current.play();
+        }
+    }
+
+    const skipSongBackwards = () => {
+        const indexOfCurrentSong = songs.indexOf(currentSong);
+        const indexOfPreviousSong = indexOfCurrentSong - 1;
+        const indexOfFirstSong = 0;
+
+        if (indexOfPreviousSong < indexOfFirstSong) {
+            audioRef.current.currentTime = 0;
+        } else {
+            setCurrentSong(songs[indexOfPreviousSong]);
+        }
+    }
+
+    const skipSongForward = () => {
+        const indexOfCurrentSong = songs.indexOf(currentSong);
+        const indexOfFollowingSong = indexOfCurrentSong + 1;
+        const lastSongIndex = songs.length - 1;
+
+        if (indexOfFollowingSong > lastSongIndex) {
+            audioRef.current.currentTime = 0;
+        } else {
+            setCurrentSong(songs[indexOfFollowingSong]);
+        }
+    }
+
     return (
         <div className="player-container">
             <div className="time-control">
                 <p>{formatTime(songTimeInfo.currentTime)}</p>
                 <input onChange={setDraggedTime} min={0} max={songTimeInfo.duration} value={songTimeInfo.currentTime} type="range" />
-                <p>{formatTime(songTimeInfo.duration)}</p>
+                <p>{formatTime(songTimeInfo.duration || 0)}</p>
             </div>
 
             <div className="play-control">
-                <FontAwesomeIcon className="skip-back" size="2x" icon={faAngleLeft} />
+                <FontAwesomeIcon onClick={() => skipSongBackwards()} className="skip-back" size="2x" icon={faAngleLeft} />
                 <FontAwesomeIcon onClick={playSong} className="play" size="2x" icon={isPlaying ? faPause : faPlay} />
-                <FontAwesomeIcon className="skip-forward" size="2x" icon={faAngleRight} />
+                <FontAwesomeIcon onClick={() => skipSongForward()} className="skip-forward" size="2x" icon={faAngleRight} />
             </div>
 
-            <audio onTimeUpdate={updateTime} onLoadedMetadata={updateTime} ref={audioRef} src={currentSong.audio}></audio>
+            <audio onLoadedData={autoPlayHandler}
+                onTimeUpdate={updateTimeHandler}
+                onLoadedMetadata={updateTimeHandler}
+                ref={audioRef}
+                src={currentSong.audio}>
+            </audio>
         </div>
     );
 }

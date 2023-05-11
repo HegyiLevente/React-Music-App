@@ -4,9 +4,20 @@
     box-sizing: border-box;
 }
 
-@import './player';
-@import './song';
-
-h1, h2, h3 {
+h1, h2 {
     color : rgb(53, 53, 53);
 }
+
+h3, h4 {
+    font-weight: 400;
+    color: rgb(102, 102, 102)
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+}
+
+@import './player';
+@import './song';
+@import './library';
+@import './nav';
