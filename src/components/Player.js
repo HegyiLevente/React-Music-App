@@ -35,16 +35,23 @@ const Player = (props) => {
     }
 
     const updateTimeEventHandler = (e) => {
-        const currentTime = e.target.currentTime;
-        const duration = e.target.duration;
-        setSongTimeInfo({ ...songTimeInfo, currentTime, duration });
-    }
+        const currentTime = Math.min(e.target.currentTime, songTimeInfo.duration);
+        setSongTimeInfo((prevSongTimeInfo) => ({
+            ...prevSongTimeInfo,
+            currentTime,
+        }));
+    };
 
     const autoPlayEventHandler = () => {
         if (isPlaying) {
             audioRef.current.play();
         }
-    }
+        setSongTimeInfo((prevSongTimeInfo) => ({
+            ...prevSongTimeInfo,
+            duration: audioRef.current.duration,
+        }));
+    };
+
 
     const skipSongBackwards = async () => {
         const indexOfCurrentSong = songs.indexOf(currentSong);
